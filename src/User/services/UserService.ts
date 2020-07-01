@@ -1,27 +1,30 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
-import { User } from "../entities/User";
-import { InjectRepository } from "@nestjs/typeorm";
-import { UserRepository } from "../repositories/UserRepository";
+import { Users } from "../entities/Users";
 import * as md5 from 'md5';
 import { DataResult } from "src/Common/data/DataResult";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { UserDto } from "../dto/UserDto";
 
 @Injectable()
 export class UserService {
 
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: UserRepository,
+    @InjectModel(Users.name)
+    private readonly userModel: Model<Users>,
   ) {}
 
-  async getListUser(take: number, page: number): Promise<DataResult<User>> {
+  async getListUser(limit: number, page: number, keyword?: string): Promise<DataResult<Users>> {
     try {
-      const optionGetData = { take, skip: page == 1 ? page-1 : (page-1) * 10 };
-      const result = await this.userRepository.find(optionGetData);
+
+      const whereStatement = keyword ? { name: new RegExp(keyword, 'i') } : null;
+      const skip = page == 1 ? page-1 : (page-1) * limit;
+      const result = await this.userModel.find(whereStatement).limit(limit).skip(skip).exec();
 
       return {
         data: result,
         page,
-        limit: take,
+        limit: limit,
         sizeData: result.length
       };
 
@@ -30,27 +33,26 @@ export class UserService {
     }
   }
 
-  async createUser(user: User): Promise<User> {
+  async createUser(user: UserDto): Promise<Users> {
+
     try {
 
-      const checkUsername = await this.userRepository.findOne({username: user.username});
+      const checkUsername = await this.userModel.findOne({username: user.username});
 
       if(checkUsername) throw new HttpException("Sorry user can't be created, username is exist", HttpStatus.INTERNAL_SERVER_ERROR);
 
-      const newUser = new User();
-      newUser.name = user.name;
-      newUser.username = user.username;
-      newUser.password = md5(user.password);
+      // convert md5
+      user.password = md5(user.password);
 
-      const result = await this.userRepository.save(newUser);
+      const createdUser = new this.userModel(user).save();
 
-      if(!result) {
+      if(!createdUser) {
         throw new HttpException("Sorry user can't be created", HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
-      return result;
+      return createdUser;
 
-    } catch (err) {
+    } catch(err) {
       throw err;
     }
   }

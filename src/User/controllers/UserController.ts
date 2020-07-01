@@ -1,10 +1,11 @@
 
 import { ApiTags, ApiOperation, ApiQuery } from "@nestjs/swagger";
 import { Controller, Post, Body, Inject, Param, Get, Req } from "@nestjs/common";
-import { User } from "../entities/User";
+import { Users } from "../entities/Users";
 import { UserService } from "../services/UserService";
-import { USER_SERVICE } from "../constants";
+import { UserDto } from "../dto/UserDto";
 import { DataResult } from "src/Common/data/DataResult";
+import { USER_SERVICE } from "../constants";
 
 @ApiTags('User')
 @Controller('/api/users')
@@ -12,7 +13,7 @@ export class UserController {
 
   constructor(
     @Inject(USER_SERVICE)
-    private userService: UserService,
+    private readonly userService: UserService,
   ) {}
 
   @Get()
@@ -29,10 +30,36 @@ export class UserController {
     example: 1
   })
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async get(@Req() request): Promise<DataResult<User>> {
+  async get(@Req() request): Promise<DataResult<Users>> {
     return this.userService.getListUser(
       request.query.hasOwnProperty('limit') ? parseInt(request.query.limit) : 10,
       request.query.hasOwnProperty('page') ? parseInt(request.query.page) : 1
+    );
+  }
+
+  @Get('/search')
+  @ApiOperation({
+    summary: 'Get filtered list User by keyword',
+    description: 'The API to get filtered list of User by keyword'
+  })
+  @ApiQuery({
+    name: 'keyword',
+    example: 'zai'
+  })
+  @ApiQuery({
+    name: 'limit',
+    example: 10
+  })
+  @ApiQuery({
+    name: 'page',
+    example: 1
+  })
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async search(@Req() request): Promise<DataResult<Users>> {
+    return this.userService.getListUser(
+      request.query.hasOwnProperty('limit') ? parseInt(request.query.limit) : 10,
+      request.query.hasOwnProperty('page') ? parseInt(request.query.page) : 1,
+      request.query.hasOwnProperty('keyword') ? request.query.name : ''
     );
   }
 
@@ -41,7 +68,7 @@ export class UserController {
     summary: 'Create User',
     description: 'The API for create User'
   })
-  async create(@Body() user: User): Promise<User> {
+  async create(@Body() user: UserDto): Promise<Users> {
     return this.userService.createUser(user);
   }
 }

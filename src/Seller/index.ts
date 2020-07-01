@@ -1,11 +1,11 @@
 
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Seller } from './entities/Seller';
-import { SellerRepository } from './repositories/SellerRepository';
+import { Sellers, SellerSchema } from './entities/Sellers';
 import { SELLER_SERVICE } from './constants';
 import { SellerService } from './services/SellerService';
 import { SellerController } from './controllers/SellerController';
+import { MongooseModule } from '@nestjs/mongoose';
 
 const sellerServiceProvider = {
   provide: SELLER_SERVICE,
@@ -13,7 +13,7 @@ const sellerServiceProvider = {
 }
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Seller, SellerRepository])],
+  imports: [MongooseModule.forFeature([{ name: Sellers.name, schema: SellerSchema }])],
   controllers: [SellerController],
   providers: [sellerServiceProvider],
   exports: [sellerServiceProvider]
