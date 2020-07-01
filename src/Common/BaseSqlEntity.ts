@@ -4,21 +4,21 @@ type Nullable<T> = T | null;
 export class BaseSqlEntity implements ObjectLiteral{
   
   @CreateDateColumn({
-    name: 'created_at',
+    name: 'createdAt',
     type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamp',
     precision: 0,
   })
   createdAt: Date = new Date();
   
   @CreateDateColumn({
-    name: 'update_at',
+    name: 'updateAt',
     type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamp',
     precision: 0,
   })
   updateAt: Date = new Date();
 
   @CreateDateColumn({
-    name: 'delete_at',
+    name: 'deletedAt',
     type: process.env.NODE_ENV === 'test' ? 'datetime' : 'timestamp',
     precision: 0,
     nullable: true,
