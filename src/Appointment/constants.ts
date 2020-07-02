@@ -1,0 +1,1 @@
+export const APPOINTMENT_SERVICE = 'Appointment.AppointmentService';

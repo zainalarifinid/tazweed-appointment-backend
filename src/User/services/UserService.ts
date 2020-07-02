@@ -44,7 +44,7 @@ export class UserService {
       // convert md5
       user.password = md5(user.password);
 
-      const createdUser = new this.userModel(user).save();
+      const createdUser = await new this.userModel(user).save();
 
       if(!createdUser) {
         throw new HttpException("Sorry user can't be created", HttpStatus.INTERNAL_SERVER_ERROR);

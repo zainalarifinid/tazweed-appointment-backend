@@ -1,6 +1,7 @@
 
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { Appointments } from 'src/Appointment/entities/Appointments';
 
 @Schema()
 export class Sellers extends Document {
@@ -36,6 +37,13 @@ export class Sellers extends Document {
   public isDeleted(): boolean {
     return this.deletedAt !== null;
   }
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Appointments',
+    default: [],
+  })
+  appointments: Appointments[];
 
 }
 
